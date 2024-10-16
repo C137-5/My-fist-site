@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiro's Payment Agency</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f7fafc, #ffffff);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .header, .footer {
+            text-align: center;
+            padding: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:disabled {
+            background-color: #ccc;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Hiro's Payment Agency</h1>
+    </header>
+
+    <main class="container">
+        <section>
+            <h2>Welcome to Hiro's Payment Agency</h2>
+            <p>Get Affordable Loans from $10 up to $500</p>
+            <button class="button" onclick="startCamera()">Apply Now</button>
+        </section>
+
+        <section class="card">
+            <h3>Loan Calculator</h3>
+            <label for="loan-amount">Loan Amount</label>
+            <select id="loan-amount" onchange="updateLoanAmount(this.value)">
+                <option value="">Select amount</option>
+                <option value="10">$10</option>
+                <option value="20">$20</option>
+                <option value="30">$30</option>
+                <option value="50">$50</option>
+                <option value="100">$100</option>
+                <option value="200">$200</option>
+                <option value="300">$300</option>
+                <option value="400">$400</option>
+                <option value="500">$500</option>
+            </select>
+
+            <label for="loan-period">Loan Period (Days)</label>
+            <select id="loan-period" onchange="updateLoanPeriod(this.value)">
+                <option value="">Select period</option>
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="21">21 days</option>
+                <option value="30">30 days</option>
+            </select>
+
+            <label>Total Repayment</label>
+            <input type="text" id="total-repayment" readonly />
+        </section>
+
+        <section class="card">
+            <h3>Capture Photo and Upload Documents</h3>
+            <video id="video" autoplay class="hidden"></video>
+            <button class="button" onclick="capturePhoto()">Capture Photo</button>
+            <button class="button" id="send-whatsapp" onclick="sendPhotoViaWhatsApp()" disabled>Send via WhatsApp</button>
+            <img id="captured-image" class="hidden" />
+        </section>
+
+        <section class="card">
+            <h3>Loan Disbursement</h3>
+            <label for="unique-code">Enter Unique Code for Disbursement</label>
+            <input type="text" id="unique-code" />
+            <button class="button" onclick="handleUniqueCodeSubmit()">Submit Code for Disbursement</button>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2023 Hiro's Payment Agency. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <script>
+        let loanAmount = 10;
+        let loanPeriod = 7;
+        let capturedImage = null;
+
+        function updateLoanAmount(value) {
+            loanAmount = Number(value);
+            calculateTotalRepayment();
+        }
+
+        function updateLoanPeriod(value) {
+            loanPeriod = Number(value);
+            calculateTotalRepayment();
+        }
+
+        function calculateTotalRepayment() {
+            const baseRate = 0.25; // 25% interest
+            const rate = loanPeriod <= 
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Snake Game</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="game-container">
+		<canvas id="gc" class="game-canvas" width="400" height="400"></canvas>
+	</div>
+	<div class="keys">
+	  <a class="up arr" onclick="Snake.action('up')">
+	    <i class="chevron up"></i></a>
+	  <br />
+	  <a class="left arr" onclick="Snake.action('left')">
+	    <i class="chevron left"></i></a>
+	  <a class="down arr" onclick="Snake.action('down')">
+	    <i class="chevron down"></i></a>
+	  <a class="right arr" onclick="Snake.action('right')">
+	    <i class="chevron right"></i></a>
+	</div>
+	<script type="text/javascript" src="game.js"></script>
+</body>
+</html>
