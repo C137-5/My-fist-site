@@ -1,0 +1,352 @@
+import { useState, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CheckCircle, DollarSign, Clock, Shield, Camera, Share2, Upload, AlertCircle } from "lucide-react"
+
+export default function LandingPage() {
+  const [loanAmount, setLoanAmount] = useState<number>(10)
+  const [loanPeriod, setLoanPeriod] = useState<number>(7)
+  const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [nationalIdImage, setNationalIdImage] = useState<string | null>(null)
+  const [userImage, setUserImage] = useState<string | null>(null)
+  const [referralLink, setReferralLink] = useState<string>('')
+  const [isVerified, setIsVerified] = useState<boolean>(false)
+  const [uniqueCode, setUniqueCode] = useState<string>('')
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const calculateInterest = (amount: number, days: number) => {
+    const baseRate = 0.25 // 25% interest
+    const rate = days <= 7 ? baseRate * 0.9 : baseRate // 10% discount for weekly returns
+    return amount * rate * (days / 30) // Prorated for the number of days
+  }
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+    } catch (err) {
+      console.error("Error accessing the camera", err)
+    }
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas')
+      canvas.width = videoRef.current.videoWidth
+      canvas.height = videoRef.current.videoHeight
+      canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0)
+      const imageDataUrl = canvas.toDataURL('image/jpeg')
+      setCapturedImage(imageDataUrl)
+    }
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, setImage: (value: string | null) => void) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const sendPhotoViaWhatsApp = () => {
+    if (capturedImage) {
+      const phoneNumber = "+263718920944"
+      const message = encodeURIComponent("New loan application photo")
+      window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
+      alert("Photo would be sent via WhatsApp (requires backend implementation)")
+    }
+  }
+
+  const generateReferralLink = () => {
+    const uniqueCode = Math.random().toString(36).substring(7)
+    const link = `https://hiros-payment-agency.com/refer/${uniqueCode}`
+    setReferralLink(link)
+  }
+
+  const copyReferralLink = () => {
+    navigator.clipboard.writeText(referralLink)
+    alert("Referral link copied to clipboard!")
+  }
+
+  const verifyNationalId = () => {
+    // Simulating verification process
+    setTimeout(() => {
+      setIsVerified(true)
+      alert("National ID verified successfully. You will be notified on WhatsApp when the unique code is ready.")
+      // Simulating WhatsApp notification to loan officer
+      console.log("WhatsApp notification sent to loan officer: New verified application received.")
+    }, 2000)
+  }
+
+  const handleUniqueCodeSubmit = () => {
+    // Simulating disbursement process
+    alert(`Loan disbursement initiated with unique code: ${uniqueCode}`)
+    // Simulating WhatsApp notification to loan officer
+    console.log(`WhatsApp notification sent to loan officer: Loan disbursed with unique code ${uniqueCode}`)
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
+      <header className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-center text-primary">Hiro's Payment Agency</h1>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <section className="text-center mb-16">
+          <h2 className="text-3xl font-bold mb-4">Welcome to Hiro's Payment Agency</h2>
+          <p className="text-xl mb-8">
+            Get Affordable Loans from $10 up to $500
+          </p>
+          <p className="text-lg mb-8">
+            Need quick cash to cover unexpected expenses? We're here to help with affordable, fast loans from $10 to $500. Whether it's for personal or emergency use, we've got you covered.
+          </p>
+          <Button size="lg" className="text-lg" onClick={startCamera}>
+            Apply Now
+          </Button>
+        </section>
+
+        {/* Loan Calculator */}
+        <section className="mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle>Loan Calculator</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="loan-amount">Loan Amount</Label>
+                  <Select onValueChange={(value) => setLoanAmount(Number(value))}>
+                    <SelectTrigger id="loan-amount">
+                      <SelectValue placeholder="Select amount" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 20, 30, 50, 100, 200, 300, 400, 500].map((amount) => (
+                        <SelectItem key={amount} value={amount.toString()}>${amount}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="loan-period">Loan Period (Days)</Label>
+                  <Select onValueChange={(value) => setLoanPeriod(Number(value))}>
+                    <SelectTrigger id="loan-period">
+                      <SelectValue placeholder="Select period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[7, 14, 21, 30].map((days) => (
+                        <SelectItem key={days} value={days.toString()}>{days} days</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Total Repayment</Label>
+                  <Input 
+                    value={`$${(loanAmount + calculateInterest(loanAmount, loanPeriod)).toFixed(2)}`} 
+                    readOnly 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Photo Capture and Document Upload */}
+        <section className="mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle>Capture Photo and Upload Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <div>
+                  <Label>Capture Your Photo</Label>
+                  <video ref={videoRef} autoPlay className="w-full h-64 bg-gray-200 rounded-lg mb-2" />
+                  <div className="flex justify-between">
+                    <Button onClick={capturePhoto}>
+                      <Camera className="mr-2 h-4 w-4" /> Capture Photo
+                    </Button>
+                    <Button onClick={sendPhotoViaWhatsApp} disabled={!capturedImage}>
+                      Send via WhatsApp
+                    </Button>
+                  </div>
+                  {capturedImage && (
+                    <div className="mt-2">
+                      <img src={capturedImage} alt="Captured" className="w-full h-64 object-cover rounded-lg" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="national-id">Upload National ID</Label>
+                  <Input 
+                    id="national-id" 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, setNationalIdImage)}
+                  />
+                  {nationalIdImage && (
+                    <div className="mt-2">
+                      <img src={nationalIdImage} alt="National ID" className="w-full h-64 object-cover rounded-lg" />
+                      <Button onClick={verifyNationalId} className="mt-2" disabled={isVerified}>
+                        {isVerified ? 'Verified' : 'Verify National ID'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="user-photo">Upload Your Photo</Label>
+                  <Input 
+                    id="user-photo" 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, setUserImage)}
+                  />
+                  {userImage && (
+                    <div className="mt-2">
+                      <img src={userImage} alt="User Photo" className="w-full h-64 object-cover rounded-lg" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Unique Code for Disbursement */}
+        <section className="mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle>Loan Disbursement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <Label htmlFor="unique-code">Enter Unique Code for Disbursement</Label>
+                <Input 
+                  id="unique-code" 
+                  type="text" 
+                  placeholder="Enter unique code"
+                  value={uniqueCode}
+                  onChange={(e) => setUniqueCode(e.target.value)}
+                />
+                <Button onClick={handleUniqueCodeSubmit} disabled={!isVerified || !uniqueCode}>
+                  Submit Code for Disbursement
+                </Button>
+                {!isVerified && (
+                  <p className="text-sm text-red-500 flex items-center">
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    Please verify your National ID before submitting the unique code.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Referral Link */}
+        <section className="mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle>Earn by Sharing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <p>Generate a unique referral link and earn rewards when your friends apply for a loan!</p>
+                <Button onClick={generateReferralLink}>
+                  <Share2 className="mr-2 h-4 w-4" /> Generate Referral Link
+                </Button>
+                {referralLink && (
+                  <div className="flex items-center gap-2">
+                    <Input value={referralLink} readOnly />
+                    <Button onClick={copyReferralLink}>Copy</Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Key Benefits */}
+        <section className="grid md:grid-cols-3 gap-8 mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Clock className="mr-2" />
+                Fast Approval
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              Apply today and get your loan in no time.
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <DollarSign className="mr-2" />
+                Flexible Repayment Terms
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              Pay back at a pace that works for you.
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Shield className="mr-2" />
+                Transparent Terms
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              Clear interest rates and no hidden fees.
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Why Choose Us */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-4 text-center">Why choose Hiro's Payment Agency?</h2>
+          <ul className="space-y-4">
+            {[
+              "Simple and quick application process",
+              "Loan amounts from $10 to $500",
+              "Competitive 25% interest rate",
+              "10% discount on interest for early repayments",
+              "Earn rewards by referring friends",
+              "Transparent and fair terms",
+              "Secure verification process",
+              "Quick disbursement with unique code"
+            ].map((item, index) => (
+              <li key={index} className="flex items-center">
+                <CheckCircle className="mr-2 text-green-500" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* CTA Section */}
+        <section className="text-center bg-primary text-primary-foreground rounded-lg p-8">
+          <h2 className="text-2xl font-bold mb-4">Contact Hiro's Payment Agency today!</h2>
+          <p className="mb-4">Call or WhatsApp: +263 71 892 0944</p>
+          <p className="mb-8">Don't let financial challenges slow you down. Apply now for a hassle-free loan!</p>
+          <Button size="lg" variant="secondary" className="text-lg">
+            Get Started
+          </Button>
+        </section>
+      </main>
+
+      <footer className="container mx-auto px-4 py-8 text-center text-gray-600">
+        <p>&copy; 2023 Hiro's Payment Agency. All rights reserved.</p>
+      </footer>
+    </div>
+  )
+}
